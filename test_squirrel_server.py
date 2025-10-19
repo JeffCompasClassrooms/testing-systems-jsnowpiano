@@ -1,4 +1,3 @@
-# test_squirrel_server.py
 import http.client
 import json
 import os
