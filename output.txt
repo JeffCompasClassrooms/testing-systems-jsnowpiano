@@ -1,0 +1,122 @@
+PS C:\Users\Jordan\Documents\testing-systems-jsnowpiano> pytest --spec
+=============================== test session starts ===============================
+platform win32 -- Python 3.12.4, pytest-8.3.3, pluggy-1.5.0
+rootdir: C:\Users\Jordan\Documents\testing-systems-jsnowpiano
+plugins: describe-2.2.0, spec-4.0.0
+collected 27 items                                                                 
+
+test_mydb.py:
+
+MyDB:
+
+  Init:
+    ✓ It sets the filename attribute
+    ✓ It creates a new empty file if missing
+    ✓ It keeps existing data
+
+  LoadStrings:
+    ✓ It returns empty list when file is empty
+    ✓ It returns existing data
+
+  SaveString:
+    ✓ It adds a string to an empty file
+    ✓ It adds a string to existing data
+
+  SaveStrings:
+    ✓ It saves list of strings
+    ✓ It overwrites previous data
+
+test_squirrel_server.py:
+
+404 cases:
+  ✓ It returns 404 for invalid route
+  ✓ It returns 404 for invalid subpath
+  ✓ It returns 404 for root path
+
+Delete squirrel:
+  ✓ It deletes existing squirrel
+  ✓ It returns 404 for nonexistent squirrel
+  ✓ It returns 404 for invalid resource
+
+Get squirrel by id:
+  ✓ It retrieves existing squirrel
+  ✓ It returns 404 for nonexistent squirrel
+  ✓ It returns 404 for non integer id
+
+Get squirrels:
+  ✓ It returns 200 status code
+  ✓ It returns json content type header
+  ✓ It returns empty json array
+  ✓ It returns json array with one squirrel
+
+Post squirrels:
+  ✓ It creates a new squirrel
+  ✓ It returns 404 if post has id
+
+Put squirrel:
+  ✓ It updates existing squirrel
+  ✓ It returns 404 for missing id
+  ✓ It returns 404 for invalid resource
+
+=============================== 27 passed in 46.64s =============================== 
+PS C:\Users\Jordan\Documents\testing-systems-jsnowpiano> pytest --spec
+=============================== test session starts ===============================
+platform win32 -- Python 3.12.4, pytest-8.3.3, pluggy-1.5.0
+rootdir: C:\Users\Jordan\Documents\testing-systems-jsnowpiano
+plugins: describe-2.2.0, spec-4.0.0
+collected 27 items                                                                 
+
+test_mydb.py:
+
+MyDB:
+
+  Init:
+    ✓ It sets the filename attribute
+    ✓ It creates a new empty file if missing
+    ✓ It keeps existing data
+
+  LoadStrings:
+    ✓ It returns empty list when file is empty
+    ✓ It returns existing data
+
+  SaveString:
+    ✓ It adds a string to an empty file
+    ✓ It adds a string to existing data
+
+  SaveStrings:
+    ✓ It saves list of strings
+    ✓ It overwrites previous data
+
+test_squirrel_server.py:
+
+404 cases:
+  ✓ It returns 404 for invalid route
+  ✓ It returns 404 for invalid subpath
+  ✓ It returns 404 for root path
+
+Delete squirrel:
+  ✓ It deletes existing squirrel
+  ✓ It returns 404 for nonexistent squirrel
+  ✓ It returns 404 for invalid resource
+
+Get squirrel by id:
+  ✓ It retrieves existing squirrel
+  ✓ It returns 404 for nonexistent squirrel
+  ✓ It returns 404 for non integer id
+
+Get squirrels:
+  ✓ It returns 200 status code
+  ✓ It returns json content type header
+  ✓ It returns empty json array
+  ✓ It returns json array with one squirrel
+
+Post squirrels:
+  ✓ It creates a new squirrel
+  ✓ It returns 404 if post has id
+
+Put squirrel:
+  ✓ It updates existing squirrel
+  ✓ It returns 404 for missing id
+  ✓ It returns 404 for invalid resource
+
+=============================== 27 passed in 46.65s ===============================
