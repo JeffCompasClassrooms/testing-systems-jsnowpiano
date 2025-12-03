@@ -166,6 +166,18 @@ def describe_post_squirrels():
         response = http_client.getresponse()
         assert response.status == 404
     
+    def it_returns_400_when_missing_size(http_client, request_headers):
+        body = urllib.parse.urlencode({'name': 'Incomplete'})
+        http_client.request("POST", "/squirrels", body=body, headers=request_headers)
+        response = http_client.getresponse()
+        assert response.status == 400
+    
+    def it_returns_400_when_missing_name(http_client, request_headers):
+        body = urllib.parse.urlencode({'size': 'large'})
+        http_client.request("POST", "/squirrels", body=body, headers=request_headers)
+        response = http_client.getresponse()
+        assert response.status == 400
+    
     def it_creates_squirrel_and_can_retrieve_it(http_client, clean_db, request_headers):
         body = urllib.parse.urlencode({'name': 'TestSquirrel', 'size': 'tiny'})
         http_client.request("POST", "/squirrels", body=body, headers=request_headers)
@@ -281,6 +293,18 @@ def describe_put_squirrel():
         http_client.request("PUT", "/squirrels", body=body, headers=request_headers)
         response = http_client.getresponse()
         assert response.status == 404
+    
+    def it_returns_400_when_missing_size(http_client, clean_db, make_a_squirrel, request_headers):
+        body = urllib.parse.urlencode({"name": "Incomplete"})
+        http_client.request("PUT", f"/squirrels/{make_a_squirrel}", body=body, headers=request_headers)
+        response = http_client.getresponse()
+        assert response.status == 400
+    
+    def it_returns_400_when_missing_name(http_client, clean_db, make_a_squirrel, request_headers):
+        body = urllib.parse.urlencode({"size": "huge"})
+        http_client.request("PUT", f"/squirrels/{make_a_squirrel}", body=body, headers=request_headers)
+        response = http_client.getresponse()
+        assert response.status == 400
 
 
 def describe_delete_squirrel():
