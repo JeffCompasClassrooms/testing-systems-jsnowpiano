@@ -17,10 +17,41 @@ todo = pytest.mark.skip(reason='todo: pending spec')
 
 @pytest.fixture(scope="session", autouse=True)
 def prepare_db_before_server():
-
+    import socket
+    import platform
+    
+    # Kill any process using port 8080 first
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    port_in_use = sock.connect_ex(('localhost', 8080)) == 0
+    sock.close()
+    
+    if port_in_use:
+        if platform.system() == "Windows":
+            subprocess.run(
+                ["powershell", "-Command", 
+                 "Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"],
+                capture_output=True,
+                text=True
+            )
+        else:
+            subprocess.run(
+                ["sh", "-c", "lsof -ti:8080 | xargs kill -9"],
+                capture_output=True,
+                text=True
+            )
+        time.sleep(2)
+    
     db_path = "squirrel_db.db"
     if os.path.exists(db_path):
-        os.remove(db_path)
+        try:
+            os.remove(db_path)
+        except PermissionError:
+            time.sleep(1)
+            try:
+                os.remove(db_path)
+            except PermissionError:
+                pass
+    
     shutil.copyfile("empty_squirrel_db.db", db_path)
     yield
 
@@ -45,26 +76,73 @@ def clean_db():
 
 @pytest.fixture(scope="session", autouse=True)
 def start_and_stop_server(prepare_db_before_server):
-    server_already_running = False
+    import socket
+    import platform
+    import signal
+    
+    lock_file = "squirrel_tests.lock"
+    
+    if os.path.exists(lock_file):
+        print("Another test instance detected. Ending other instance")
+        try:
+            with open(lock_file, 'r') as f:
+                old_pid = int(f.read().strip())
+            
+            if platform.system() == "Windows":
+                subprocess.run(["taskkill", "/F", "/PID", str(old_pid)], 
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                os.kill(old_pid, signal.SIGKILL)
+            
+            time.sleep(1)
+            print("Previous test instance killed.")
+        except (ValueError, ProcessLookupError, FileNotFoundError):
+            pass
+        
+
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
+    
+    with open(lock_file, 'w') as f:
+        f.write(str(os.getpid()))
+    
     try:
-        test_conn = http.client.HTTPConnection("localhost:8080", timeout=1)
-        test_conn.request("GET", "/squirrels")
-        response = test_conn.getresponse()
-        test_conn.close()
-        server_already_running = True
-        print("\nServer already running on port 8080. Using existing server.")
-        proc = None
-    except (ConnectionRefusedError, OSError):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        port_in_use = sock.connect_ex(('localhost', 8080)) == 0
+        sock.close()
+        
+        if port_in_use:
+            print("\nKilling existing server on port 8080...")
+            
+            if platform.system() == "Windows":
+                subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"],
+                    capture_output=True,
+                    text=True
+                )
+            else:
+                subprocess.run(
+                    ["sh", "-c", "lsof -ti:8080 | xargs kill -9"],
+                    capture_output=True,
+                    text=True
+                )
+            
+            time.sleep(1)
+        
         proc = subprocess.Popen([sys.executable, "squirrel_server.py"], 
                                stdout=subprocess.DEVNULL, 
                                stderr=subprocess.DEVNULL)
         time.sleep(1)
-    
-    yield
-    
-    if proc is not None:
+        
+        yield
+        
         proc.terminate()
         proc.wait()
+    finally:
+        # Remove lock file
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
 
 @pytest.fixture
 def http_client():
